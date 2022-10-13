@@ -16,16 +16,25 @@ public class Main : NetworkBehaviour {
         btnClient.onClick.AddListener(OnClientClicked);
     }
 
-
-    private void OnHostClicked() {
+    private void StartHost() {
         NetworkManager.Singleton.StartHost();
         NetworkManager.SceneManager.LoadScene(
             "Lobby",
             UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
 
-    private void OnClientClicked() {
-        NetworkManager.Singleton.StartClient();
+    private void OnHostClicked() {
+        btnClient.gameObject.SetActive(false);
+        btnHost.gameObject.SetActive(false);
+        txtStatus.text = "Starting Host";
+        StartHost();
     }
 
+    private void OnClientClicked() {
+        btnClient.gameObject.SetActive(false);
+        btnHost.gameObject.SetActive(false);
+        txtStatus.text = "Waiting on Host";
+        NetworkManager.Singleton.StartClient();
+    }
+    
 }
