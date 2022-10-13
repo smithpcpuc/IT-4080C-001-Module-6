@@ -11,4 +11,21 @@ public class Main : NetworkBehaviour {
     public Button btnClient;
     public TMPro.TMP_Text txtStatus;
 
+    public void Start() {
+        btnHost.onClick.AddListener(OnHostClicked);
+        btnClient.onClick.AddListener(OnClientClicked);
+    }
+
+
+    private void OnHostClicked() {
+        NetworkManager.Singleton.StartHost();
+        NetworkManager.SceneManager.LoadScene(
+            "Lobby",
+            UnityEngine.SceneManagement.LoadSceneMode.Single);
+    }
+
+    private void OnClientClicked() {
+        NetworkManager.Singleton.StartClient();
+    }
+
 }
