@@ -33,6 +33,10 @@ public class LobbyManager : NetworkBehaviour
             AddPlayerToList(NetworkManager.LocalClientId);
             RefreshPlayerPanels();
         }
+
+        if (IsClient) {
+            btnReady.onClick.AddListener(ClientOnReadyClicked);
+        }
     }
 
     public override void OnNetworkSpawn() {
@@ -45,13 +49,13 @@ public class LobbyManager : NetworkBehaviour
         // Must be after Host Connects to signals
         base.OnNetworkSpawn();
 
-        if (IsClient){
+        if (IsClient && !IsHost){
             allPlayers.OnListChanged += ClientOnAllPlayersChanged;
             btnStart.gameObject.SetActive(false);
-            btnReady.onClick.AddListener(ClientOnReadyClicked);
         }
         txtPlayerNumber.text = $"Player #{NetworkManager.LocalClientId}";
     }
+
 
     [ServerRpc(RequireOwnership = false)]
     public void TogglerReadyServerRpc(ServerRpcParams serverRpcParams = default) {
@@ -61,12 +65,23 @@ public class LobbyManager : NetworkBehaviour
 
         info.isReady = !info.isReady;
         allPlayers[playerIndex] = info;
+
+        info = allPlayers[playerIndex];
+
+        int readyCount = 0;
+        foreach (PlayerInfo readyInfo in allPlayers) {
+            if (readyInfo.isReady) {
+                readyCount += 1;
+            }
+        }
+
+        btnStart.enabled = readyCount == allPlayers.Count - 1;
     }
     // -----------------
     // Private
     // -----------------
     private void AddPlayerToList(ulong clientId) {
-        allPlayers.Add(new PlayerInfo(clientId, NextColor(), false));
+        allPlayers.Add(new PlayerInfo(clientId, NextColor(), true));
     }
 
     private void AddPlayerPanel(PlayerInfo info) {
@@ -125,6 +140,7 @@ public class LobbyManager : NetworkBehaviour
     }
 
     private void HostOnClientConnected(ulong clientId) {
+        btnStart.enabled = false;
         AddPlayerToList(clientId);
         RefreshPlayerPanels();
     }

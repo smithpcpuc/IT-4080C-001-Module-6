@@ -8,7 +8,7 @@ public struct PlayerInfo : INetworkSerializable, System.IEquatable<PlayerInfo> {
     public Color color;
     public bool isReady;
 
-    public PlayerInfo(ulong id, Color c, bool isReady=false) {
+    public PlayerInfo(ulong id, Color c, bool ready = false) {
         clientId = id;
         color = c;
         isReady = ready;
