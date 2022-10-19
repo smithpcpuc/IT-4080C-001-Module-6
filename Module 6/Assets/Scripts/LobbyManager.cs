@@ -36,20 +36,31 @@ public class LobbyManager : NetworkBehaviour
     }
 
     public override void OnNetworkSpawn() {
-        
-
         if (IsHost) {
             NetworkManager.Singleton.OnClientConnectedCallback += HostOnClientConnected;
             NetworkManager.Singleton.OnClientDisconnectCallback += HostOnClientDisconnected;
-            
+            btnStart.gameObject.SetActive(false);  
         }
+
         // Must be after Host Connects to signals
         base.OnNetworkSpawn();
 
         if (IsClient){
             allPlayers.OnListChanged += ClientOnAllPlayersChanged;
+            btnStart.gameObject.SetActive(false);
+            btnReady.onClick.AddListener(ClientOnReadyClicked);
         }
         txtPlayerNumber.text = $"Player #{NetworkManager.LocalClientId}";
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void TogglerReadyServerRpc(ServerRpcParams serverRpcParams = default) {
+        ulong clientId = serverRpcParams.Receive.SenderClientId;
+        int playerIndex = FindPlayerIndex(clientId);
+        PlayerInfo info = allPlayers[playerIndex];
+
+        info.isReady = !info.isReady;
+        allPlayers[playerIndex] = info;
     }
     // -----------------
     // Private
@@ -91,7 +102,6 @@ public class LobbyManager : NetworkBehaviour
             }
         }
         
-
         if (!found) {
             idx = -1;
         }
@@ -125,5 +135,9 @@ public class LobbyManager : NetworkBehaviour
             allPlayers.RemoveAt(index);
             RefreshPlayerPanels();
         }
+    }
+
+    private void ClientOnReadyClicked() {
+        TogglerReadyServerRpc();
     }
 }
