@@ -12,6 +12,7 @@ public class LobbyManager : NetworkBehaviour
     public GameObject playerScrollContent;
     public TMPro.TMP_Text txtPlayerNumber;
     public Button btnStart;
+    public Button btnReady;
     public Player playerPrefab;
 
     private NetworkList<PlayerInfo> allPlayers = new NetworkList<PlayerInfo>();
