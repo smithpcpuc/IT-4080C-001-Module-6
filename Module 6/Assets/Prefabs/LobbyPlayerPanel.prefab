@@ -94,6 +94,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   txtName: {fileID: 378167119951620460}
+  txtReady: {fileID: 6446345938506192798}
   pnlColor: {fileID: 489774141330825152}
 --- !u!114 &6418265707896612044
 MonoBehaviour:

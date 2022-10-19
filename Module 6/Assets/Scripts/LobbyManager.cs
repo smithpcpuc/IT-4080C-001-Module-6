@@ -54,7 +54,7 @@ public class LobbyManager : NetworkBehaviour
     // Private
     // -----------------
     private void AddPlayerToList(ulong clientId) {
-        allPlayers.Add(new PlayerInfo(clientId, NextColor()));
+        allPlayers.Add(new PlayerInfo(clientId, NextColor(), false));
     }
 
     private void AddPlayerPanel(PlayerInfo info) {
@@ -62,6 +62,7 @@ public class LobbyManager : NetworkBehaviour
         newPanel.transform.SetParent(playerScrollContent.transform, false);
         newPanel.SetName($"Player {info.clientId.ToString()}");
         newPanel.SetColor(info.color);
+        newPanel.SetReady(info.isReady);
         playerPanels.Add(newPanel);
 
     }
