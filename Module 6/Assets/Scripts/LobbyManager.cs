@@ -9,7 +9,6 @@ public class LobbyManager : NetworkBehaviour
 {
 
     public LobbyPlayerPanel playerPanelPrefab;
-    public GameObject playersPanel;
     public GameObject playerScrollContent;
     public TMPro.TMP_Text txtPlayerNumber;
     public Button btnStart;
@@ -32,16 +31,19 @@ public class LobbyManager : NetworkBehaviour
         if (IsHost) {
             NetworkManager.Singleton.OnClientConnectedCallback += HostOnClientConnected;
             //NetworkManager.Singleton.OnClientDisconnectCallback += HostOnClientDisconnected;
+            
         }
+        // Must be after Host Connects to signals
         base.OnNetworkSpawn();
+
+        if (IsClient){
+            allPlayers.OnListChanged += ClientOnAllPlayersChanged;
+        }
+        txtPlayerNumber.text = $"Player #{NetworkManager.LocalClientId}";
     }
-
-    private void HostOnClientConnected(ulong clientId) {
-        AddPlayerToList(clientId);
-        RefreshPlayerPanels();
-    }
-
-
+    // -----------------
+    // Private
+    // -----------------
     private void AddPlayerToList(ulong clientId) {
         allPlayers.Add(new PlayerInfo(clientId, Color.red));
     }
@@ -64,6 +66,17 @@ public class LobbyManager : NetworkBehaviour
         foreach (PlayerInfo pi in allPlayers) {
             AddPlayerPanel(pi);
         }
+    }
+    // ------------------
+    // Events
+    // ------------------
+    private void ClientOnAllPlayersChanged(NetworkListEvent<PlayerInfo> changeEvent) {
+        RefreshPlayerPanels();
+    }
+
+    private void HostOnClientConnected(ulong clientId) {
+        AddPlayerToList(clientId);
+        RefreshPlayerPanels();
     }
     
 }
