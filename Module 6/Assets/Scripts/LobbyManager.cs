@@ -17,6 +17,15 @@ public class LobbyManager : NetworkBehaviour
     private NetworkList<PlayerInfo> allPlayers = new NetworkList<PlayerInfo>();
     private List<LobbyPlayerPanel> playerPanels = new List<LobbyPlayerPanel>();
 
+    private Color[] playerColors = new Color[] {
+        Color.blue,
+        Color.green,
+        Color.yellow,
+        Color.grey,
+        Color.cyan
+    };
+    private int colorIndex = 0;
+
 
     public void Start() {
         if (IsHost) {
@@ -30,7 +39,7 @@ public class LobbyManager : NetworkBehaviour
 
         if (IsHost) {
             NetworkManager.Singleton.OnClientConnectedCallback += HostOnClientConnected;
-            //NetworkManager.Singleton.OnClientDisconnectCallback += HostOnClientDisconnected;
+            NetworkManager.Singleton.OnClientDisconnectCallback += HostOnClientDisconnected;
             
         }
         // Must be after Host Connects to signals
@@ -45,7 +54,7 @@ public class LobbyManager : NetworkBehaviour
     // Private
     // -----------------
     private void AddPlayerToList(ulong clientId) {
-        allPlayers.Add(new PlayerInfo(clientId, Color.red));
+        allPlayers.Add(new PlayerInfo(clientId, NextColor()));
     }
 
     private void AddPlayerPanel(PlayerInfo info) {
@@ -67,6 +76,35 @@ public class LobbyManager : NetworkBehaviour
             AddPlayerPanel(pi);
         }
     }
+
+    private int FindPlayerIndex(ulong clientId) {
+        var idx = 0;
+        var found = false;
+
+        while (idx < allPlayers.Count && !found) {
+            if (allPlayers[idx].clientId == clientId) {
+                found = true;
+            } else {
+                idx += 1;
+            }
+        }
+        
+
+        if (!found) {
+            idx = -1;
+        }
+
+        return idx;
+    }
+    
+    private Color NextColor() {
+    Color newColor = playerColors[colorIndex];
+        colorIndex += 1;
+        if (colorIndex > playerColors.Length - 1) {
+            colorIndex = 0;
+        }
+        return newColor;
+    }
     // ------------------
     // Events
     // ------------------
@@ -79,4 +117,11 @@ public class LobbyManager : NetworkBehaviour
         RefreshPlayerPanels();
     }
     
+    private void HostOnClientDisconnected(ulong clientId) {
+        int index = FindPlayerIndex(clientId);
+        if(index != -1) {
+            allPlayers.RemoveAt(index);
+            RefreshPlayerPanels();
+        }
+    }
 }
